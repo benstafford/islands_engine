@@ -52,11 +52,11 @@ defmodule IslandsEngine.Game do
     :ets.delete(:game_state, state_data.player1.name)
     :ok
   end
+
   def terminate(_reason, state), do: :ok
 
   def handle_call({:add_player, name}, _from, state_data) do
-    with {:ok, rules} <- Rules.check(state_data.rules, :add_player)
-    do
+    with {:ok, rules} <- Rules.check(state_data.rules, :add_player) do
       state_data
       |> update_player2_name(name)
       |> update_rules(rules)
@@ -68,11 +68,11 @@ defmodule IslandsEngine.Game do
 
   def handle_call({:position_island, player, key, row, col}, _from, state_data) do
     board = player_board(state_data, player)
+
     with {:ok, rules} <- Rules.check(state_data.rules, {:position_islands, player}),
-      {:ok, coordinate} <- Coordinate.new(row, col),
-      {:ok, island} <- Island.new(key, coordinate),
-      %{} = board <- Board.position_island(board, key, island)
-    do
+         {:ok, coordinate} <- Coordinate.new(row, col),
+         {:ok, island} <- Island.new(key, coordinate),
+         %{} = board <- Board.position_island(board, key, island) do
       state_data
       |> update_board(player, board)
       |> update_rules(rules)
@@ -86,9 +86,9 @@ defmodule IslandsEngine.Game do
 
   def handle_call({:set_islands, player}, _from, state_data) do
     board = player_board(state_data, player)
+
     with {:ok, rules} <- Rules.check(state_data.rules, {:set_islands, player}),
-      true            <- Board.all_islands_positioned?(board)
-    do
+         true <- Board.all_islands_positioned?(board) do
       state_data
       |> update_rules(rules)
       |> reply_success({:ok, board})
@@ -103,10 +103,10 @@ defmodule IslandsEngine.Game do
     opponent_board = player_board(state_data, opponent_key)
 
     with {:ok, rules} <- Rules.check(state_data.rules, {:guess_coordinate, player_key}),
-      {:ok, coordinate} <- Coordinate.new(row, col),
-      {hit_or_miss, forested_island, win_status, opponent_board} <- Board.guess(opponent_board, coordinate),
-      {:ok, rules} <- Rules.check(rules, {:win_check, win_status})
-    do
+         {:ok, coordinate} <- Coordinate.new(row, col),
+         {hit_or_miss, forested_island, win_status, opponent_board} <-
+           Board.guess(opponent_board, coordinate),
+         {:ok, rules} <- Rules.check(rules, {:win_check, win_status}) do
       state_data
       |> update_board(opponent_key, opponent_board)
       |> update_guesses(player_key, hit_or_miss, coordinate)
