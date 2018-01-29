@@ -98,7 +98,7 @@ defmodule IslandsEngine.Game do
     end
   end
 
-  def handle_call({:guess_coordinate, player_key, col, row}, _from, state_data) do
+  def handle_call({:guess_coordinate, player_key, row, col}, _from, state_data) do
     opponent_key = opponent(player_key)
     opponent_board = player_board(state_data, opponent_key)
 
